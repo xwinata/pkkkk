@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  pkkkk:
+    build: .
+    ports:
+      - 8000:8000
+    image: pkkkk:development
+    volumes:
+      - ./:/go/src/pkkkk
+    hostname: pkkkk
+    environment:
+      - APPNAME=pkkkk
+      - ROOT=$GOPATH\src\pkkkk
+      - APPENV=development
+    container_name: pkkkk
+
+networks:
+  default:
+    external:
+      name: docker_local
