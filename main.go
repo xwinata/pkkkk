@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"os"
-	"pkkkk/appconf"
 	"pkkkk/router"
 )
 
@@ -29,10 +28,6 @@ func main() {
 		// 	AllowHeaders: []string{"*"},
 		// }))
 		e.Logger.Fatal(e.Start(":8000"))
-		os.Exit(0)
-		break
-	case "automigrate":
-		appconf.Configuration.Migrate()
 		os.Exit(0)
 		break
 	}

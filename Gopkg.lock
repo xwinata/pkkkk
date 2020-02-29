@@ -197,14 +197,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:89ef0a6f456957bd8601e2e78e827046b43ffb72a84ead6bf145bd194590b843"
-  name = "github.com/xwinata/basemodel"
-  packages = ["."]
-  pruneopts = ""
-  revision = "8b7e015cdcb4dbf1ca77869daafeaf8c7009f935"
-
-[[projects]]
-  branch = "master"
   digest = "1:623570fddb99ef064b125c7bf3161f14aba21fdb787896b6c5070d34187c86f8"
   name = "golang.org/x/crypto"
   packages = [
@@ -285,10 +277,11 @@
   input-imports = [
     "github.com/fsnotify/fsnotify",
     "github.com/jinzhu/gorm",
+    "github.com/jinzhu/gorm/dialects/mysql",
     "github.com/jinzhu/gorm/dialects/postgres",
     "github.com/labstack/echo",
+    "github.com/lib/pq",
     "github.com/spf13/viper",
-    "github.com/xwinata/basemodel",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

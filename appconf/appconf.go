@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"pkkkk/migration"
 	"pkkkk/models"
 	"strings"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
-	"github.com/xwinata/basemodel"
 
 	// import postgres sql
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -71,9 +70,27 @@ func (c *Configs) Viperinit() error {
 
 // DBinit initiates database configuration
 func (c *Configs) DBinit() (err error) {
+	var (
+		connectionString string
+	)
+	type DBConfig struct {
+		Adapter        string
+		Host           string
+		Port           string
+		Username       string
+		Password       string
+		Table          string
+		Timezone       string
+		Maxlifetime    int
+		IdleConnection int
+		OpenConnection int
+		SSL            string
+		Logmode        bool
+	}
+
 	dbconf := c.Viper.GetStringMap(fmt.Sprintf("%s.database", c.ENV))
-	Cons := basemodel.DBConfig{
-		Adapter:        basemodel.PostgresAdapter,
+	conf := DBConfig{
+		Adapter:        "postgres",
 		Host:           dbconf["host"].(string),
 		Port:           dbconf["port"].(string),
 		Username:       dbconf["username"].(string),
@@ -86,9 +103,32 @@ func (c *Configs) DBinit() (err error) {
 		SSL:            dbconf["sslmode"].(string),
 		Logmode:        dbconf["logmode"].(bool),
 	}
-	basemodel.Start(Cons)
-	c.DB = basemodel.DB
 
+	switch conf.Adapter {
+	case "mysql":
+		connectionString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", conf.Username, conf.Password, conf.Host, conf.Port, conf.Table)
+	case "postgres":
+		connectionString = fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", conf.Username, conf.Password, conf.Host, conf.Port, conf.Table, conf.SSL)
+	}
+	c.DB, err = gorm.Open(conf.Adapter, connectionString)
+	if err != nil {
+		return err
+	}
+
+	c.DB.LogMode(conf.Logmode)
+
+	c.DB.Exec(fmt.Sprintf("SET TIMEZONE TO '%s'", conf.Timezone))
+	c.DB.DB().SetConnMaxLifetime(time.Second * time.Duration(conf.Maxlifetime))
+	c.DB.DB().SetMaxIdleConns(conf.IdleConnection)
+	c.DB.DB().SetMaxOpenConns(conf.OpenConnection)
+
+	// err = c.AutoMigrate()
+
+	return err
+}
+
+// AutoMigrate database migration
+func (c *Configs) AutoMigrate() (err error) {
 	err = c.DB.AutoMigrate(&models.Provinsi{}, &models.Kota{}, &models.Kelurahan{}, &models.Kecamatan{}).Error
 	if err != nil {
 		return err
@@ -97,14 +137,6 @@ func (c *Configs) DBinit() (err error) {
 	c.DB.Model(&models.Kota{}).AddForeignKey("provinsi_id", "provinsis(id)", "CASCADE", "RESTRICT")
 	c.DB.Model(&models.Kecamatan{}).AddForeignKey("kota_id", "kota(id)", "CASCADE", "RESTRICT")
 	c.DB.Model(&models.Kelurahan{}).AddForeignKey("kecamatan_id", "kecamatans(id)", "CASCADE", "RESTRICT")
-
-	return nil
-}
-
-// Migrate database migration
-func (c *Configs) Migrate() (err error) {
-	db := c.DB
-	err = migration.AutoMigrate(db)
 
 	return err
 }

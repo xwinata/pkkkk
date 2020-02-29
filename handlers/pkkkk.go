@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
+	"pkkkk/appconf"
 	"pkkkk/models"
-	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -19,180 +18,177 @@ type Result struct {
 }
 
 // Start by showing all provinsi
-func Start(c echo.Context) error {
+func Start(c echo.Context) (err error) {
 	defer c.Request().Body.Close()
 
-	provinsi := models.Provinsi{}
+	provinsi := []models.Provinsi{}
 
-	options, err := provinsi.FindFilter([]string{"name"}, []string{"asc"}, 0, 0, &models.Provinsi{})
+	err = appconf.Configuration.DB.Find(&provinsi).Error
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusOK, options)
+	return c.JSON(http.StatusOK, provinsi)
 }
 
-// InProvinsi shows provinsi content
-func InProvinsi(c echo.Context) error {
-	defer c.Request().Body.Close()
+// // InProvinsi shows provinsi content
+// func InProvinsi(c echo.Context) error {
+// 	defer c.Request().Body.Close()
 
-	kota := models.Kota{}
-	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
+// 	kota := models.Kota{}
+// 	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
 
-	provinsi := models.Provinsi{}
-	provinsi.FindbyID(idprovinsi)
+// 	provinsi := models.Provinsi{}
+// 	provinsi.FindbyID(idprovinsi)
 
-	options, err := kota.FindFilter([]string{"name"}, []string{"asc"}, 0, 0, &models.Kota{
-		ProvinsiID: idprovinsi,
-	})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
+// 	options, err := kota.FindFilter([]string{"name"}, []string{"asc"}, 0, 0, &models.Kota{
+// 		ProvinsiID: idprovinsi,
+// 	})
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
 
-	return c.JSON(http.StatusOK, &Result{
-		Provinsi: provinsi,
-		Options:  options,
-	})
-}
+// 	return c.JSON(http.StatusOK, &Result{
+// 		Provinsi: provinsi,
+// 		Options:  options,
+// 	})
+// }
 
-// InKota shows kota content
-func InKota(c echo.Context) error {
-	defer c.Request().Body.Close()
+// // InKota shows kota content
+// func InKota(c echo.Context) error {
+// 	defer c.Request().Body.Close()
 
-	kecamatan := models.Kecamatan{}
-	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
-	idkota, err := strconv.ParseUint(c.Param("idkota"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
+// 	kecamatan := models.Kecamatan{}
+// 	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
+// 	idkota, err := strconv.ParseUint(c.Param("idkota"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
 
-	provinsi := models.Provinsi{}
-	provinsi.FindbyID(idprovinsi)
-	kota := models.Kota{}
-	kota.FindbyID(idkota)
+// 	provinsi := models.Provinsi{}
+// 	kota := models.Kota{}
+// 	provinsi.FindbyID(idprovinsi).Related(&kota)
 
-	options, err := kecamatan.FindFilter([]string{"name"}, []string{"asc"}, 0, 0, &models.Kecamatan{
-		KotaID: idkota,
-	})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
+// 	options, err := kecamatan.FindFilter([]string{"name"}, []string{"asc"}, 0, 0, &models.Kecamatan{
+// 		KotaID: idkota,
+// 	})
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
 
-	return c.JSON(http.StatusOK, &Result{
-		Provinsi: provinsi,
-		Kota:     kota,
-		Options:  options,
-	})
-}
+// 	return c.JSON(http.StatusOK, &Result{
+// 		Provinsi: provinsi,
+// 		Kota:     kota,
+// 		Options:  options,
+// 	})
+// }
 
-// InKecamatan shows kecamatan content
-func InKecamatan(c echo.Context) error {
-	defer c.Request().Body.Close()
+// // InKecamatan shows kecamatan content
+// func InKecamatan(c echo.Context) error {
+// 	defer c.Request().Body.Close()
 
-	kelurahan := models.Kelurahan{}
-	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
-	idkota, err := strconv.ParseUint(c.Param("idkota"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
-	idkecamatan, err := strconv.ParseUint(c.Param("idkecamatan"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
+// 	kelurahan := models.Kelurahan{}
+// 	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
+// 	idkota, err := strconv.ParseUint(c.Param("idkota"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
+// 	idkecamatan, err := strconv.ParseUint(c.Param("idkecamatan"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
 
-	provinsi := models.Provinsi{}
-	provinsi.FindbyID(idprovinsi)
-	kota := models.Kota{}
-	kota.FindbyID(idkota)
-	kecamatan := models.Kecamatan{}
-	kecamatan.FindbyID(idkecamatan)
+// 	provinsi := models.Provinsi{}
+// 	provinsi.FindbyID(idprovinsi)
+// 	kota := models.Kota{}
+// 	kota.FindbyID(idkota)
+// 	kecamatan := models.Kecamatan{}
+// 	kecamatan.FindbyID(idkecamatan)
 
-	options, err := kelurahan.FindFilter([]string{"name"}, []string{"asc"}, 0, 0, &models.Kelurahan{
-		KecamatanID: idkecamatan,
-	})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
+// 	options, err := kelurahan.FindFilter([]string{"name"}, []string{"asc"}, 0, 0, &models.Kelurahan{
+// 		KecamatanID: idkecamatan,
+// 	})
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
 
-	return c.JSON(http.StatusOK, &Result{
-		Provinsi:  provinsi,
-		Kota:      kota,
-		Kecamatan: kecamatan,
-		Options:   options,
-	})
-}
+// 	return c.JSON(http.StatusOK, &Result{
+// 		Provinsi:  provinsi,
+// 		Kota:      kota,
+// 		Kecamatan: kecamatan,
+// 		Options:   options,
+// 	})
+// }
 
-// InKelurahan shows kelurahan content
-func InKelurahan(c echo.Context) error {
-	defer c.Request().Body.Close()
+// // InKelurahan shows kelurahan content
+// func InKelurahan(c echo.Context) error {
+// 	defer c.Request().Body.Close()
 
-	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
-	idkota, err := strconv.ParseUint(c.Param("idkota"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
-	idkecamatan, err := strconv.ParseUint(c.Param("idkecamatan"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
-	idkelurahan, err := strconv.ParseUint(c.Param("idkelurahan"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
-			"message": fmt.Sprintf("%v", err),
-		})
-	}
+// 	idprovinsi, err := strconv.ParseUint(c.Param("idprovinsi"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
+// 	idkota, err := strconv.ParseUint(c.Param("idkota"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
+// 	idkecamatan, err := strconv.ParseUint(c.Param("idkecamatan"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
+// 	idkelurahan, err := strconv.ParseUint(c.Param("idkelurahan"), 10, 64)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, map[string]interface{}{
+// 			"message": fmt.Sprintf("%v", err),
+// 		})
+// 	}
 
-	provinsi := models.Provinsi{}
-	provinsi.FindbyID(idprovinsi)
-	kota := models.Kota{}
-	kota.FindbyID(idkota)
-	kecamatan := models.Kecamatan{}
-	kecamatan.FindbyID(idkecamatan)
-	kelurahan := models.Kelurahan{}
-	kelurahan.FindbyID(idkelurahan)
+// 	provinsi := models.Provinsi{}
+// 	provinsi.FindbyID(idprovinsi)
+// 	kota := models.Kota{}
+// 	kota.FindbyID(idkota)
+// 	kecamatan := models.Kecamatan{}
+// 	kecamatan.FindbyID(idkecamatan)
+// 	kelurahan := models.Kelurahan{}
+// 	kelurahan.FindbyID(idkelurahan)
 
-	return c.JSON(http.StatusOK, &Result{
-		Provinsi:  provinsi,
-		Kota:      kota,
-		Kecamatan: kecamatan,
-		Kelurahan: kelurahan,
-	})
-}
+// 	return c.JSON(http.StatusOK, &Result{
+// 		Provinsi:  provinsi,
+// 		Kota:      kota,
+// 		Kecamatan: kecamatan,
+// 		Kelurahan: kelurahan,
+// 	})
+// }

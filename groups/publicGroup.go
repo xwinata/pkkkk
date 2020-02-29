@@ -12,8 +12,8 @@ func DefaultGroup(e *echo.Echo) {
 
 	// config info
 	g.GET("/start", handlers.Start)
-	g.GET("/start/:idprovinsi", handlers.InProvinsi)
-	g.GET("/start/:idprovinsi/:idkota", handlers.InKota)
-	g.GET("/start/:idprovinsi/:idkota/:idkecamatan", handlers.InKecamatan)
-	g.GET("/start/:idprovinsi/:idkota/:idkecamatan/:idkelurahan", handlers.InKelurahan)
+	// g.GET("/start/:idprovinsi", handlers.InProvinsi)
+	// g.GET("/start/:idprovinsi/:idkota", handlers.InKota)
+	// g.GET("/start/:idprovinsi/:idkota/:idkecamatan", handlers.InKecamatan)
+	// g.GET("/start/:idprovinsi/:idkota/:idkecamatan/:idkelurahan", handlers.InKelurahan)
 }
